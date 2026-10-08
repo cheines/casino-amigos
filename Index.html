@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎰 Casino de los Amigos 🎰</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Arial Black', sans-serif;
+    background: radial-gradient(ellipse at top, #1a0033 0%, #000 100%);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  header {
+    background: linear-gradient(180deg, #2a0a4a 0%, #0a0015 100%);
+    border-bottom: 3px solid #d4af37;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
+  }
+  .logo {
+    font-size: 1.8em;
+    color: #d4af37;
+    text-shadow: 0 0 15px #d4af37, 2px 2px 4px #000;
+    letter-spacing: 2px;
+  }
+  .user-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .user-info input {
+    padding: 8px 12px;
+    border: 2px solid #d4af37;
+    border-radius: 5px;
+    background: #000;
+    color: #fff;
+    font-weight: bold;
+  }
+  .saldo-box {
+    background: #000;
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+    padding: 8px 15px;
+    color: #00ff88;
+    font-size: 1.1em;
+    text-shadow: 0 0 8px #00ff88;
+  }
+  nav {
+    background: #0a0015;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid #333;
+  }
+  .nav-btn {
+    padding: 12px 25px;
+    background: linear-gradient(145deg, #4a0e7a, #2a0548);
+    color: #d4af37;
+    border: 2px solid #d4af37;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1em;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4); }
+  .nav-btn.active {
+    background: linear-gradient(145deg, #d4af37, #a07a10);
+    color: #000;
+  }
+  main {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+  }
+  .juego { display: none; }
+  .juego.activo { display: block; animation: fadeIn 0.4s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .panel {
+    background: linear-gradient(145deg, #1a0033, #0a0015);
+    border: 3px solid #d4af37;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+  }
+  h2 {
+    text-align: center;
+    color: #d4af37;
+    text-shadow: 0 0 15px #d4af37;
+    margin-bottom: 25px;
+    font-size: 2em;
+  }
+  
+  /* SLOTS */
+  .rodillos {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    background: #000;
+    border: 4px solid #d4af37;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .rodillo {
+    width: 90px; height: 100px;
+    background: linear-gradient(180deg, #fff, #ddd);
+    border: 3px solid #333;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5em;
+    overflow: hidden;
+  }
+  .rodillo.girando { animation: girar 0.1s linear infinite; }
+  @keyframes girar { 0% { transform: translateY(-10px); } 100% { transform: translateY(10px); } }
+  
+  /* RULETA */
+  .ruleta-container { text-align: center; }
+  .ruleta {
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: conic-gradient(
+      #c0392b 0deg 9.7deg, #000 9.7deg 19.4deg,
+      #c0392b 19.4deg 29.1deg, #000 29.1deg 38.8deg,
+      #c0392b 38.8deg 48.5deg, #000 48.5deg 58.2deg,
+      #c0392b 58.2deg 67.9deg, #000 67.9deg 77.6deg,
+      #c0392b 77.6deg 87.3deg, #000 87.3deg 97deg,
+      #c0392b 97deg 106.7deg, #000 106.7deg 116.4deg,
+      #c0392b 116.4deg 126.1deg, #000 126.1deg 135.8deg,
+      #c0392b 135.8deg 145.5deg, #000 145.5deg 155.2deg,
+      #c0392b 155.2deg 164.9deg, #000 164.9deg 174.6deg,
+      #006400 174.6deg 184.3deg,
+      #000 184.3deg 194deg, #c0392b 194deg 203.7deg,
+      #000 203.7deg 213.4deg, #c0392b 213.4deg 223.1deg,
+      #000 223.1deg 232.8deg, #c0392b 232.8deg 242.5deg,
+      #000 242.5deg 252.2deg, #c0392b 252.2deg 261.9deg,
+      #000 261.9deg 271.6deg, #c0392b 271.6deg 281.3deg,
+      #000 281.3deg 291deg, #c0392b 291deg 300.7deg,
+      #000 300.7deg 310.4deg, #c0392b 310.4deg 320.1deg,
+      #000 320.1deg 329.8deg, #c0392b 329.8deg 339.5deg,
+      #000 339.5deg 349.2deg, #c0392b 349.2deg 360deg
+    );
+    border: 8px solid #d4af37;
+    margin: 0 auto 20px;
+    position: relative;
+    transition: transform 4s cubic-bezier(0.17, 0.67, 0.21, 0.99);
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+  }
+  .ruleta::before {
+    content: '▼';
+    position: absolute;
+    top: -35px; left: 50%;
+    transform: translateX(-50%);
+    color: #d4af37;
+    font-size: 2em;
+    text-shadow: 0 0 10px #000;
+  }
+  .ruleta::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px; height: 50px;
+    background: #d4af37;
+    border-radius: 50%;
+    border: 4px solid #000;
+  }
+  .numeros-ruleta {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+    margin: 20px 0;
+  }
+  .num-btn {
+    padding: 10px;
+    border: 2px solid #d4af37;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #fff;
+    transition: all 0.2s;
+  }
+  .num-btn:hover { transform: scale(1.05); }
+  .num-btn.rojo { background: #c0392b; }
+  .num-btn.negro { background: #000; }
+  .num-btn.verde { background: #006400; }
+  .num-btn.selected { box-shadow: 0 0 15px #d4af37; border-color: #fff; }
+  
+  /* BLACKJACK */
+  .mesa-bj {
+    background: radial-gradient(ellipse at center, #0a5c2e 0%, #042e17 100%);
+    border: 4px solid #d4af37;
+    border-radius: 20px;
+    padding: 30px;
+    min-height: 300px;
+  }
+  .mano {
+    margin: 20px 0;
+    text-align: center;
+  }
+  .mano h3 { color: #d4af37; margin-bottom: 10px; }
+  .cartas {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-height: 100px;
+  }
+  .carta {
+    width: 70px; height: 100px;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 5px;
+    font-size: 1.2em;
+    font-weight: bold;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+    animation: repartir 0.3s;
+  }
+  @keyframes repartir { from { transform: translateY(-50px) rotate(-10deg); opacity: 0; } to { transform: translateY(0) rotate(0); opacity: 1; } }
+  .carta.roja { color: #c0392b; }
+  .carta.negra { color: #000; }
+  .carta.oculta {
+    background: linear-gradient(135deg, #4a0e7a, #2a0548);
+    color: #d4af37;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+  }
+  
+  /* DADOS */
+  .dados-container { text-align: center; }
+  .dados {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 30px 0;
+  }
+  .dado {
+    width: 90px; height: 90px;
+    background: #fff;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5em;
+    color: #000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    border: 3px solid #d4af37;
+  }
+  .dado.tirando { animation: rodar 0.1s linear infinite; }
+  @keyframes rodar {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  
+  /* CONTROLES COMUNES */
+  .controles {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    margin-top: 20px;
+  }
+  .fila {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  label { color: #d4af37; font-weight: bold; }
+  input[type="number"], select {
+    padding: 10px;
+    border: 2px solid #d4af37;
+    border-radius: 5px;
+    background: #000;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1em;
+    width: 120px;
+  }
+  .btn {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    font-weight: bold;
+    background: linear-gradient(145deg, #ff3b3b, #b80000);
+    color: #fff;
+    border: 3px solid #d4af37;
+    border-radius: 10px;
+    cursor: pointer;
+    text-shadow: 2px 2px 4px #000;
+    transition: transform 0.1s;
+  }
+  .btn:hover:not(:disabled) { transform: scale(1.05); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.verde { background: linear-gradient(145deg, #27ae60, #145a32); }
+  .btn.azul { background: linear-gradient(145deg, #2980b9, #154360); }
+  
+  .mensaje {
+    text-align: center;
+    min-height: 40px;
+    font-size: 1.4em;
+    margin-top: 20px;
+    font-weight: bold;
+  }
+  .ganaste { color: #00ff88; text-shadow: 0 0 15px #00ff88; animation: brillo 0.5s ease infinite alternate; }
+  .perdiste { color: #ff6b6b; }
+  @keyframes brillo {
+    from { text-shadow: 0 0 5px #00ff88; }
+    to { text-shadow: 0 0 25px #00ff88, 0 0 40px #00ff88; }
+  }
+  
+  .ranking {
+    background: #000;
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+  }
+  .ranking h3 { color: #d4af37; text-align: center; margin-bottom: 10px; }
+  .ranking-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid #333;
+  }
+  .ranking-item:last-child { border-bottom: none; }
+  .ranking-item.top1 { color: #ffd700; font-weight: bold; }
+  .ranking-item.top2 { color: #c0c0c0; }
+  .ranking-item.top3 { color: #cd7f32; }
+  
+  .confeti {
+    position: fixed;
+    width: 10px; height: 10px;
+    pointer-events: none;
+    animation: caer 2s linear forwards;
+    z-index: 9999;
+  }
+  @keyframes caer {
+    to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🎰 CASINO AMIGOS 🎰</div>
+  <div class="user-info">
+    <input type="text" id="nombre" placeholder="Tu nombre" maxlength="15">
+    <div class="saldo-box">💰 <span id="saldo">1000</span></div>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" onclick="cambiarJuego('slots', this)">🎰 Tragamonedas</button>
+  <button class="nav-btn" onclick="cambiarJuego('ruleta', this)">🎡 Ruleta</button>
+  <button class="nav-btn" onclick="cambiarJuego('blackjack', this)">🃏 Blackjack</button>
+  <button class="nav-btn" onclick="cambiarJuego('dados', this)">🎲 Dados</button>
+</nav>
+
+<main>
+
+  <!-- TRAGAMONEDAS -->
+  <div id="slots" class="juego activo">
+    <div class="panel">
+      <h2>🎰 TRAGAMONEDAS 🎰</h2>
+      <div class="rodillos">
+        <div class="rodillo" id="r1">🍒</div>
+        <div class="rodillo" id="r2">🍋</div>
+        <div class="rodillo" id="r3">⭐</div>
+      </div>
+      <div class="controles">
+        <div class="fila">
+          <label>Apuesta:</label>
+          <input type="number" id="apuesta-slots" value="50" min="10" step="10">
+        </div>
+        <button class="btn" onclick="jugarSlots()">🎲 GIRAR 🎲</button>
+      </div>
+      <div class="mensaje" id="msg-slots">¡Buena suerte!</div>
+    </div>
+  </div>
+
+  <!-- RULETA -->
+  <div id="ruleta" class="juego">
+    <div class="panel">
+      <h2>🎡 RULETA 🎡</h2>
+      <div class="ruleta-container">
+        <div class="ruleta" id="ruleta-wheel"></div>
+        <div class="controles">
+          <div class="fila">
+            <label>Apuesta:</label>
+            <input type="number" id="apuesta-ruleta" value="50" min="10" step="10">
+          </div>
+          <div class="fila">
+            <label>Tipo:</label>
+            <select id="tipo-ruleta" onchange="actualizarOpcionesRuleta()">
+              <option value="color">Color (Rojo/Negro x2)</option>
+              <option value="par">Par/Impar (x2)</option>
+              <option value="numero">Número exacto (x36)</option>
+            </select>
+          </div>
+          <div class="fila" id="opciones-ruleta"></div>
+          <button class="btn" onclick="jugarRuleta()">🎡 GIRAR RULETA 🎡</button>
+        </div>
+        <div class="mensaje" id="msg-ruleta">Elige tu apuesta</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLACKJACK -->
+  <div id="blackjack" class="juego">
+    <div class="panel">
+      <h2>🃏 BLACKJACK 🃏</h2>
+      <div class="mesa-bj">
+        <div class="mano">
+          <h3>👤 Dealer (<span id="puntos-dealer">0</span>)</h3>
+          <div class="cartas" id="cartas-dealer"></div>
+        </div>
+        <div class="mano">
+          <h3>🎮 Tú (<span id="puntos-jugador">0</span>)</h3>
+          <div class="cartas" id="cartas-jugador"></div>
+        </div>
+      </div>
+      <div class="controles">
+        <div class="fila">
+          <label>Apuesta:</label>
+          <input type="number" id="apuesta-bj" value="50" min="10" step="10">
+        </div>
+        <div class="fila">
+          <button class="btn verde" id="btn-repartir" onclick="iniciarBJ()">🃏 REPARTIR</button>
+          <button class="btn azul" id="btn-pedir" onclick="pedirCarta()" disabled>👆 PEDIR</button>
+          <button class="btn" id="btn-plantar" onclick="plantarse()" disabled>✋ PLANTARSE</button>
+        </div>
+      </div>
+      <div class="mensaje" id="msg-bj">Haz tu apuesta y reparte</div>
+    </div>
+  </div>
+
+  <!-- DADOS -->
+  <div id="dados" class="juego">
+    <div class="panel">
+      <h2>🎲 DADOS 🎲</h2>
+      <div class="dados-container">
+        <div class="dados">
+          <div class="dado" id="d1">⚀</div>
+          <div class="dado" id="d2">⚁</div>
+        </div>
+        <div class="controles">
+          <div class="fila">
+            <label>Apuesta:</label>
+            <input type="number" id="apuesta-dados" value="50" min="10" step="10">
+          </div>
+          <div class="fila">
+            <label>Predice suma:</label>
+            <select id="prediccion-dados">
+              <option value="bajo">Bajo (2-6) x2</option>
+              <option value="siete">Siete exacto x5</option>
+              <option value="alto">Alto (8-12) x2</option>
+              <option value="dobles">Dobles x6</option>
+            </select>
+          </div>
+          <button class="btn" onclick="jugarDados()">🎲 TIRAR DADOS 🎲</button>
+        </div>
+        <div class="mensaje" id="msg-dados">¡Haz tu predicción!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RANKING -->
+  <div class="ranking">
+    <h3>🏆 RANKING DE JUGADORES 🏆</h3>
+    <div id="ranking-lista"></div>
+  </div>
+
+</main>
+
+<script>
+  // ========== ESTADO GLOBAL ==========
+  let saldo = parseInt(localStorage.getItem('casino_saldo')) || 1000;
+  let nombre = localStorage.getItem('casino_nombre') || '';
+  document.getElementById('saldo').textContent = saldo;
+  document.getElementById('nombre').value = nombre;
+  document.getElementById('nombre').addEventListener('input', e => {
+    nombre = e.target.value;
+    localStorage.setItem('casino_nombre', nombre);
+    actualizarRanking();
+  });
+
+  function actualizarSaldo(cambio) {
+    saldo += cambio;
+    if (saldo < 0) saldo = 0;
+    document.getElementById('saldo').textContent = saldo;
+    localStorage.setItem('casino_saldo', saldo);
+    if (saldo === 0) {
+      setTimeout(() => {
+        alert('💸 ¡Te quedaste sin puntos! El banco te regala 500.');
+        saldo = 500;
+        document.getElementById('saldo').textContent = saldo;
+        localStorage.setItem('casino_saldo', saldo);
+      }, 500);
+    }
+    actualizarRanking();
+  }
+
+  // ========== RANKING (simulado local, cada amigo ve el suyo) ==========
+  function actualizarRanking() {
+    // En un demo real multi-usuario esto vendría de Firebase
+    const lista = document.getElementById('ranking-lista');
+    const jugadores = JSON.parse(localStorage.getItem('casino_ranking') || '[]');
+    // Actualizar o añadir jugador actual
+    const idx = jugadores.findIndex(j => j.nombre === nombre);
+    if (nombre) {
+      if (idx >= 0) jugadores[idx].saldo = saldo;
+      else jugadores.push({ nombre, saldo });
+    }
+    jugadores.sort((a, b) => b.saldo - a.saldo);
+    localStorage.setItem('casino_ranking', JSON.stringify(jugadores.slice(0, 10)));
+    
+    lista.innerHTML = jugadores.length === 0 ? '<div style="text-align:center;color:#888;">Sé el primero en jugar</div>' :
+      jugadores.slice(0, 5).map((j, i) => {
+        const clase = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+        const medalla = ['🥇','🥈','🥉','4️⃣','5️⃣'][i];
+        return `<div class="ranking-item ${clase}"><span>${medalla} ${j.nombre}</span><span>💰 ${j.saldo}</span></div>`;
+      }).join('');
+  }
+  actualizarRanking();
+
+  // ========== NAVEGACIÓN ==========
+  function cambiarJuego(id, btn) {
+    document.querySelectorAll('.juego').forEach(j => j.classList.remove('activo'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('activo');
+    btn.classList.add('active');
+  }
+
+  // ========== CONFETI ==========
+  function confeti() {
+    const colores = ['#d4af37', '#00ff88', '#ff3b3b', '#fff', '#9b59b6'];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement('div');
+      c.className = 'confeti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.top = '-20px';
+      c.style.background = colores[Math.floor(Math.random() * colores.length)];
+      c.style.animationDelay = Math.random() * 0.5 + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 2500);
+    }
+  }
+
+  // ========== TRAGAMONEDAS ==========
+  const simbolos = ['🍒', '🍋', '🔔', '⭐', '7️⃣', '💎'];
+  const pesos = [25, 25, 20, 15, 10, 5];
+  function elegirSimbolo() {
+    const total = pesos.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < simbolos.length; i++) {
+      if (r < pesos[i]) return simbolos[i];
+      r -= pesos[i];
+    }
+    return simbolos[0];
+  }
+  async function jugarSlots() {
+    const apuesta = parseInt(document.getElementById('apuesta-slots').value);
+    const msg = document.getElementById('msg-slots');
+    if (apuesta < 10 || apuesta > saldo) {
+      msg.textContent = apuesta > saldo ? '❌ Puntos insuficientes' : '❌ Mínimo 10';
+      msg.className = 'mensaje perdiste';
+      return;
+    }
+    actualizarSaldo(-apuesta);
+    msg.textContent = '🎰 Girando...';
+    msg.className = 'mensaje';
+    const r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3');
+    [r1, r2, r3].forEach(r => r.classList.add('girando'));
+    const intv = setInterval(() => {
+      r1.textContent = simbolos[Math.floor(Math.random() * simbolos.length)];
+      r2.textContent = simbolos[Math.floor(Math.random() * simbolos.length)];
+      r3.textContent = simbolos[Math.floor(Math.random() * simbolos.length)];
+    }, 80);
+    const s1 = elegirSimbolo(), s2 = elegirSimbolo(), s3 = elegirSimbolo();
+    await new Promise(r => setTimeout(r, 1500));
+    clearInterval(intv);
+    r1.classList.remove('girando'); r1.textContent = s1;
+    await new Promise(r => setTimeout(r, 300));
+    r2.classList.remove('girando'); r2.textContent = s2;
+    await new Promise(r => setTimeout(r, 300));
+    r3.classList.remove('girando'); r3.textContent = s3;
+    
+    let ganancia = 0;
+    if (s1 === s2 && s2 === s3) {
+      const m = { '💎': 50, '7️⃣': 25, '⭐': 15, '🔔': 10, '🍒': 5, '🍋': 3 };
+      ganancia = apuesta * m[s1];
+    } else if (s1 === s2 || s2 === s3 || s1 === s3) {
+      ganancia = Math.floor(apuesta * 1.5);
+    }
+    if (ganancia > 0) {
+      actualizarSaldo(ganancia);
+      msg.textContent = ganancia >= apuesta * 10 ? `🎉 ¡¡¡JACKPOT!!! +${ganancia}` : `✨ ¡Ganaste! +${ganancia}`;
+      msg.className = 'mensaje ganaste';
+      if (ganancia >= apuesta * 10) confeti();
+    } else {
+      msg.textContent = `😢 No hubo suerte. -${apuesta}`;
+      msg.className = 'mensaje perdiste';
+    }
+  }
+
+  // ========== RULETA ==========
+  const numerosRuleta = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+  const rojos = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+  let opcionRuleta = null;
+  function actualizarOpcionesRuleta() {
+    const tipo = document.getElementById('tipo-ruleta').value;
+    const cont = document.getElementById('opciones-ruleta');
+    opcionRuleta = null;
+    if (tipo === 'color') {
+      cont.innerHTML = `<button class="num-btn rojo" onclick="seleccionar('rojo',this)">ROJO</button><button class="num-btn negro" onclick="seleccionar('negro',this)">NEGRO</button>`;
+    } else if (tipo === 'par') {
+      cont.innerHTML = `<button class="num-btn verde" onclick="seleccionar('par',this)">PAR</button><button class="num-btn verde" onclick="seleccionar('impar',this)">IMPAR</button>`;
+    } else {
+      cont.innerHTML = `<input type="number" id="num-elegido" min="0" max="36" placeholder="0-36" style="width:100px;">`;
+    }
+  }
+  function seleccionar(val, btn) {
+    document.querySelectorAll('#opciones-ruleta .num-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    opcionRuleta = val;
+  }
+  async function jugarRuleta() {
+    const apuesta = parseInt(document.getElementById('apuesta-ruleta').value);
+    const tipo = document.getElementById('tipo-ruleta').value;
+    const msg = document.getElementById('msg-ruleta');
+    if (tipo !== 'numero' && !opcionRuleta) { msg.textContent = '❌ Elige una opción'; msg.className = 'mensaje perdiste'; return; }
+    if (tipo === 'numero') {
+      const n = parseInt(document.getElementById('num-elegido').value);
+      if (isNaN(n) || n < 0 || n > 36) { msg.textContent = '❌ Número inválido (0-36)'; msg.className = 'mensaje perdiste'; return; }
+      opcionRuleta = n;
+    }
+    if (apuesta < 10 || apuesta > saldo) { msg.textContent = '❌ Apuesta inválida'; msg.className = 'mensaje perdiste'; return; }
+    
+    actualizarSaldo(-apuesta);
+    msg.textContent = '🎡 Girando...';
+    msg.className = 'mensaje';
+    
+    const resultado = numerosRuleta[Math.floor(Math.random() * numerosRuleta.length)];
+    const idx = numerosRuleta.indexOf(resultado);
+    const angulo = 360 * 5 + (idx * (360 / numerosRuleta.length));
+    const wheel = document.getElementById('ruleta-wheel');
+    wheel.style.transform = `rotate(${angulo}deg)`;
+    
+    await new Promise(r => setTimeout(r, 4200));
+    
+    const esRojo = rojos.includes(resultado);
+    const esPar = resultado !== 0 && resultado % 2 === 0;
+    let gana = false, multi = 0;
+    if (tipo === 'color') {
+      if ((opcionRuleta === 'rojo' && esRojo) || (opcionRuleta === 'negro' && !esRojo && resultado !== 0)) { gana = true; multi = 2; }
+    } else if (tipo === 'par') {
+      if ((opcionRuleta === 'par' && esPar) || (opcionRuleta === 'impar' && !esPar && resultado !== 0)) { gana = true; multi = 2; }
+    } else {
+      if (opcionRuleta === resultado) { gana = true; multi = 36; }
+    }
+    
+    const colorTxt = resultado === 0 ? '🟢 VERDE 0' : (esRojo ? '🔴 ROJO' : '⚫ NEGRO') + ' ' + resultado;
+    if (gana) {
+      const ganancia = apuesta * multi;
+      actualizarSaldo(ganancia);
+      msg.textContent = `🎉 Salió ${colorTxt}. ¡Ganaste +${ganancia}!`;
+      msg.className = 'mensaje ganaste';
+      if (multi >= 10) confeti();
+    } else {
+      msg.textContent = `😢 Salió ${colorTxt}. -${apuesta}`;
+      msg.className = 'mensaje perdiste';
+    }
+  }
+  actualizarOpcionesRuleta();
+
+  // ========== BLACKJACK ==========
+  const palos = ['♠','♥','♦','♣'];
+  const valores = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  let mazo = [], manoJugador = [], manoDealer = [], apuestaBJ = 0, bjActivo = false;
+  
+  function crearMazo() {
+    mazo = [];
+    for (let p of palos) for (let v of valores) mazo.push({ v, p });
+    for (let i = mazo.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [mazo[i], mazo[j]] = [mazo[j], mazo[i]];
+    }
+  }
+  function valorCarta(c) {
+    if (['J','Q','K'].includes(c.v)) return 10;
+    if (c.v === 'A') return 11;
+    return parseInt(c.v);
+  }
+  function sumaMano(mano) {
+    let s = mano.reduce((a, c) => a + valorCarta(c), 0);
+    let as = mano.filter(c => c.v === 'A').length;
+    while (s > 21 && as > 0) { s -= 10; as--; }
+    return s;
+  }
+  function renderCartas(divId, mano, ocultarPrimera = false) {
+    const div = document.getElementById(divId);
+    div.innerHTML = '';
+    mano.forEach((c, i) => {
+      if (ocultarPrimera && i === 0) {
+        div.innerHTML += `<div class="carta oculta">?</div>`;
+      } else {
+        const color = (c.p === '♥' || c.p === '♦') ? 'roja' : 'negra';
+        div.innerHTML += `<div class="carta ${color}"><div>${c.v}</div><div style="text-align:right;">${c.p}</div></div>`;
+      }
+    });
+  }
+  async function iniciarBJ() {
+    apuestaBJ = parseInt(document.getElementById('apuesta-bj').value);
+    const msg = document.getElementById('msg-bj');
+    if (apuestaBJ < 10 || apuestaBJ > saldo) { msg.textContent = '❌ Apuesta inválida'; msg.className = 'mensaje perdiste'; return; }
+    actualizarSaldo(-apuestaBJ);
+    crearMazo();
+    manoJugador = [mazo.pop(), mazo.pop()];
+    manoDealer = [mazo.pop(), mazo.pop()];
+    renderCartas('cartas-jugador', manoJugador);
+    renderCartas('cartas-dealer', manoDealer, true);
+    document.getElementById('puntos-jugador').textContent = sumaMano(manoJugador);
+    document.getElementById('puntos-dealer').textContent = valorCarta(manoDealer[1]);
+    document.getElementById('btn-repartir').disabled = true;
+    document.getElementById('btn-pedir').disabled = false;
+    document.getElementById('btn-plantar').disabled = false;
+    msg.textContent = '¿Pedir o plantarse?';
+    msg.className = 'mensaje';
+    bjActivo = true;
+    if (sumaMano(manoJugador) === 21) await plantarse();
+  }
+  async function pedirCarta() {
+    if (!bjActivo) return;
+    manoJugador.push(mazo.pop());
+    renderCartas('cartas-jugador', manoJugador);
+    const s = sumaMano(manoJugador);
+    document.getElementById('puntos-jugador').textContent = s;
+    if (s > 21) await finalizarBJ('tepasaste');
+    else if (s === 21) await plantarse();
+  }
+  async function plantarse() {
+    if (!bjActivo) return;
+    document.getElementById('btn-pedir').disabled = true;
+    document.getElementById('btn-plantar').disabled = true;
+    renderCartas('cartas-dealer', manoDealer);
+    while (sumaMano(manoDealer) < 17) {
+      await new Promise(r => setTimeout(r, 600));
+      manoDealer.push(mazo.pop());
+      renderCartas('cartas-dealer', manoDealer);
+      document.getElementById('puntos-dealer').textContent = sumaMano(manoDealer);
+    }
+    await new Promise(r => setTimeout(r, 400));
+    const sj = sumaMano(manoJugador), sd = sumaMano(manoDealer);
+    if (sd > 21) await finalizarBJ('dealer');
+    else if (sj > sd) await finalizarBJ('gana');
+    else if (sj < sd) await finalizarBJ('pierde');
+    else await finalizarBJ('empate');
+  }
+  async function finalizarBJ(resultado) {
+    bjActivo = false;
+    const msg = document.getElementById('msg-bj');
+    document.getElementById('puntos-dealer').textContent = sumaMano(manoDealer);
+    renderCartas('cartas-dealer', manoDealer);
+    document.getElementById('btn-repartir').disabled = false;
+    document.getElementById('btn-pedir').disabled = true;
+    document.getElementById('btn-plantar').disabled = true;
+    if (resultado === 'tepasaste') {
+      msg.textContent = `💥 ¡Te pasaste! -${apuestaBJ}`;
+      msg.className = 'mensaje perdiste';
+    } else if (resultado === 'dealer') {
+      actualizarSaldo(apuestaBJ * 2);
+      msg.textContent = `🎉 ¡Dealer se pasó! +${apuestaBJ}`;
+      msg.className = 'mensaje ganaste';
+    } else if (resultado === 'gana') {
+      const ganancia = sumaMano(manoJugador) === 21 && manoJugador.length === 2 ? Math.floor(apuestaBJ * 2.5) : apuestaBJ * 2;
+      actualizarSaldo(ganancia);
+      msg.textContent = `🎉 ¡GANASTE! +${ganancia - apuestaBJ}`;
+      msg.className = 'mensaje ganaste';
+      if (ganancia > apuestaBJ * 2) confeti();
+    } else if (resultado === 'pierde') {
+      msg.textContent = `😢 Dealer gana. -${apuestaBJ}`;
+      msg.className = 'mensaje perdiste';
+    } else {
+      actualizarSaldo(apuestaBJ);
+      msg.textContent = `🤝 Empate. Apuesta devuelta.`;
+      msg.className = 'mensaje';
+    }
+  }
+
+  // ========== DADOS ==========
+  const caras = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+  async function jugarDados() {
+    const apuesta = parseInt(document.getElementById('apuesta-dados').value);
+    const pred = document.getElementById('prediccion-dados').value;
+    const msg = document.getElementById('msg-dados');
+    if (apuesta < 10 || apuesta > saldo) { msg.textContent = '❌ Apuesta inválida'; msg.className = 'mensaje perdiste'; return; }
+    actualizarSaldo(-apuesta);
+    msg.textContent = '🎲 Tirando...';
+    msg.className = 'mensaje';
+    const d1 = document.getElementById('d1'), d2 = document.getElementById('d2');
+    d1.classList.add('tirando'); d2.classList.add('tirando');
+    const intv = setInterval(() => {
+      d1.textContent = caras[Math.floor(Math.random() * 6)];
+      d2.textContent = caras[Math.floor(Math.random() * 6)];
+    }, 80);
+    const v1 = Math.floor(Math.random() * 6) + 1;
+    const v2 = Math.floor(Math.random() * 6) + 1;
+    await new Promise(r => setTimeout(r, 1500));
+    clearInterval(intv);
+    d1.classList.remove('tirando'); d2.classList.remove('tirando');
+    d1.textContent = caras[v1 - 1];
+    d2.textContent = caras[v2 - 1];
+    const suma = v1 + v2;
+    let gana = false, multi = 0;
+    if (pred === 'bajo' && suma >= 2 && suma <= 6) { gana = true; multi = 2; }
+    else if (pred === 'alto' && suma >= 8 && suma <= 12) { gana = true; multi = 2; }
+    else if (pred === 'siete' && suma === 7) { gana = true; multi = 5; }
+    else if (pred === 'dobles' && v1 === v2) { gana = true; multi = 6; }
+    
+    if (gana) {
+      const ganancia = apuesta * multi;
+      actualizarSaldo(ganancia);
+      msg.textContent = `🎉 Suma ${suma} (${v1}+${v2}). ¡+${ganancia}!`;
+      msg.className = 'mensaje ganaste';
+      if (multi >= 5) confeti();
+    } else {
+      msg.textContent = `😢 Suma ${suma} (${v1}+${v2}). -${apuesta}`;
+      msg.className = 'mensaje perdiste';
+    }
+  }
+</script>
+
+</body>
+</html>
